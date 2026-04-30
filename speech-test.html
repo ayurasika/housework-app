@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>音声出力テスト</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+    background: #1a1a1a;
+    color: #eee;
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 8px;
+    color: #fff;
+  }
+  .lead {
+    font-size: 13px;
+    color: #888;
+    margin: 0 0 24px;
+  }
+  .section {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  button {
+    width: 100%;
+    background: #3a7bd5;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    cursor: pointer;
+    text-align: left;
+  }
+  button:active { background: #2c5fa8; }
+  button.preset {
+    background: #333;
+    color: #eee;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  button.preset:active { background: #444; }
+  .preset-label {
+    font-size: 11px;
+    color: #888;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .preset-text {
+    font-size: 15px;
+    color: #eee;
+  }
+  textarea {
+    width: 100%;
+    background: #1a1a1a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 12px;
+  }
+  select {
+    width: 100%;
+    background: #1a1a1a;
+    color: #eee;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .control-group label {
+    display: block;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  input[type="range"] {
+    width: 100%;
+  }
+  .stop-btn {
+    background: #c0392b;
+  }
+  .stop-btn:active { background: #962d22; }
+  .status {
+    font-size: 12px;
+    color: #888;
+    margin-top: 8px;
+    min-height: 18px;
+  }
+</style>
+</head>
+<body>
+<h1>音声出力テスト</h1>
+<p class="lead">スマホで開いて、家事中の使用感を試す用</p>
+
+<div class="section">
+  <div class="section-title">プリセット（タップで読み上げ）</div>
+  <button class="preset" onclick="speak('皿洗いを始めます。目標は15分です。')">
+    <span class="preset-label">タスク開始</span>
+    <span class="preset-text">皿洗いを始めます。目標は15分です。</span>
+  </button>
+  <button class="preset" onclick="speak('残り5分です。')">
+    <span class="preset-label">経過時間の声かけ</span>
+    <span class="preset-text">残り5分です。</span>
+  </button>
+  <button class="preset" onclick="speak('目標時間を過ぎました。終わらせる？延長する？')">
+    <span class="preset-label">超過時</span>
+    <span class="preset-text">目標時間を過ぎました。終わらせる？延長する？</span>
+  </button>
+  <button class="preset" onclick="speak('完了。お疲れさま。')">
+    <span class="preset-label">完了時のねぎらい</span>
+    <span class="preset-text">完了。お疲れさま。</span>
+  </button>
+  <button class="preset" onclick="speak('OK、3分だけ違うことしてから戻ろう。')">
+    <span class="preset-label">逃げ検知への応答</span>
+    <span class="preset-text">OK、3分だけ違うことしてから戻ろう。</span>
+  </button>
+  <button class="preset" onclick="speak('今日もう3個終わってる。十分やってるよ。')">
+    <span class="preset-label">自己否定への応答</span>
+    <span class="preset-text">今日もう3個終わってる。十分やってるよ。</span>
+  </button>
+</div>
+
+<div class="section">
+  <div class="section-title">言葉選びで温度感を変える（聴き比べ）</div>
+  <button class="preset" onclick="speak('完了。')">
+    <span class="preset-label">機械的</span>
+    <span class="preset-text">完了。</span>
+  </button>
+  <button class="preset" onclick="speak('終わったね。ひと息つこ。')">
+    <span class="preset-label">温かめ</span>
+    <span class="preset-text">終わったね。ひと息つこ。</span>
+  </button>
+  <button class="preset" onclick="speak('目標時間を過ぎました。')">
+    <span class="preset-label">機械的</span>
+    <span class="preset-text">目標時間を過ぎました。</span>
+  </button>
+  <button class="preset" onclick="speak('時間ちょっと過ぎたよ。どうする？')">
+    <span class="preset-label">温かめ</span>
+    <span class="preset-text">時間ちょっと過ぎたよ。どうする？</span>
+  </button>
+  <button class="preset" onclick="speak('次のタスクは皿洗いです。')">
+    <span class="preset-label">機械的</span>
+    <span class="preset-text">次のタスクは皿洗いです。</span>
+  </button>
+  <button class="preset" onclick="speak('次、皿洗いいこか。')">
+    <span class="preset-label">温かめ</span>
+    <span class="preset-text">次、皿洗いいこか。</span>
+  </button>
+  <button class="preset" onclick="speak('OK、3分だけ違うことしてから戻ろう。')">
+    <span class="preset-label">普通</span>
+    <span class="preset-text">OK、3分だけ違うことしてから戻ろう。</span>
+  </button>
+  <button class="preset" onclick="speak('OK……3分だけ、違うことしてから……戻ろっか。')">
+    <span class="preset-label">間あり（速さ0.9推奨）</span>
+    <span class="preset-text">OK……3分だけ、違うことしてから……戻ろっか。</span>
+  </button>
+</div>
+
+<div class="section">
+  <div class="section-title">自由入力</div>
+  <textarea id="customText" placeholder="ここに好きな文章を入力">あゆみ、おはよう。今日のタスクを始めよう。</textarea>
+  <button onclick="speakCustom()">読み上げ</button>
+</div>
+
+<div class="section">
+  <div class="section-title">声と速さ</div>
+  <select id="voiceSelect"></select>
+  <div class="controls">
+    <div class="control-group">
+      <label>速さ: <span id="rateValue">1.0</span></label>
+      <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1.0">
+    </div>
+    <div class="control-group">
+      <label>高さ: <span id="pitchValue">1.0</span></label>
+      <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1.0">
+    </div>
+  </div>
+  <button class="stop-btn" onclick="stopSpeak()">停止</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+  let voices = [];
+  const voiceSelect = document.getElementById('voiceSelect');
+  const rateInput = document.getElementById('rate');
+  const pitchInput = document.getElementById('pitch');
+  const rateValue = document.getElementById('rateValue');
+  const pitchValue = document.getElementById('pitchValue');
+  const statusEl = document.getElementById('status');
+
+  function loadVoices() {
+    voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('ja'));
+    voiceSelect.innerHTML = '';
+    if (voices.length === 0) {
+      const opt = document.createElement('option');
+      opt.textContent = '日本語の声が見つかりません';
+      voiceSelect.appendChild(opt);
+      return;
+    }
+    voices.forEach((voice, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = `${voice.name} (${voice.lang})`;
+      voiceSelect.appendChild(opt);
+    });
+  }
+  loadVoices();
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+
+  rateInput.addEventListener('input', () => rateValue.textContent = rateInput.value);
+  pitchInput.addEventListener('input', () => pitchValue.textContent = pitchInput.value);
+
+  function speak(text) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = parseFloat(rateInput.value);
+    u.pitch = parseFloat(pitchInput.value);
+    if (voices.length > 0 && voiceSelect.value !== '') {
+      u.voice = voices[parseInt(voiceSelect.value)];
+    }
+    u.onstart = () => statusEl.textContent = '再生中...';
+    u.onend = () => statusEl.textContent = '完了';
+    u.onerror = (e) => statusEl.textContent = 'エラー: ' + e.error;
+    speechSynthesis.speak(u);
+  }
+
+  function speakCustom() {
+    const text = document.getElementById('customText').value.trim();
+    if (text) speak(text);
+  }
+
+  function stopSpeak() {
+    speechSynthesis.cancel();
+    statusEl.textContent = '停止';
+  }
+</script>
+</body>
+</html>
