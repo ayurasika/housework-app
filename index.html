@@ -125,18 +125,12 @@
     line-height: 1.3;
   }
   .timer {
-    font-size: 56px;
+    font-size: 44px;
     font-weight: 300;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 8px;
-  }
-  .target-time {
-    font-size: 14px;
     color: #888;
+    font-variant-numeric: tabular-nums;
     margin-bottom: 32px;
   }
-  .timer.over { color: #f5b942; }
   .over-message {
     background: #2c4a6e;
     border-radius: 12px;
@@ -287,6 +281,7 @@
   <div class="running-container">
     <div class="remaining-count" id="remaining-count">あと N 個</div>
     <div class="current-task-name" id="current-task-name">タスク名</div>
+    <div class="timer" id="timer">00:00</div>
     <div class="running-controls">
       <button class="btn btn-large" id="btn-start">開始</button>
       <button class="btn btn-large hidden" id="btn-finish">終了</button>
@@ -430,6 +425,18 @@ function renderOrdering() {
 }
 
 // ============ 画面3: 実行モード ============
+let timerInterval = null;
+function updateTimer() {
+  if (!state.isRunning || !state.taskStartedAt) {
+    document.getElementById('timer').textContent = '00:00';
+    return;
+  }
+  const elapsedSec = Math.floor((Date.now() - state.taskStartedAt) / 1000);
+  const m = Math.floor(elapsedSec / 60);
+  const s = elapsedSec % 60;
+  document.getElementById('timer').textContent =
+    `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
 function startRunning() {
   state.todayList = state.selected.map(name => ({
     name,
@@ -451,12 +458,18 @@ function renderRunning() {
   document.getElementById('current-task-name').textContent = task.name;
   document.getElementById('btn-start').classList.toggle('hidden', state.isRunning);
   document.getElementById('btn-finish').classList.toggle('hidden', !state.isRunning);
+  if (!state.isRunning) {
+    document.getElementById('timer').textContent = '00:00';
+  }
 }
 function startTask() {
   state.isRunning = true;
   state.taskStartedAt = Date.now();
   state.todayList[state.currentIndex].startedAt = state.taskStartedAt;
   renderRunning();
+  updateTimer();
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
 }
 function finishTask() {
   const task = state.todayList[state.currentIndex];
@@ -464,6 +477,7 @@ function finishTask() {
   task.elapsedSec = Math.floor((task.finishedAt - task.startedAt) / 1000);
   state.log.push({ ...task });
   saveDailyLog(state.log);
+  if (timerInterval) clearInterval(timerInterval);
   showCompleteFlash(task.elapsedSec);
   state.isRunning = false;
   state.taskStartedAt = null;
