@@ -566,10 +566,71 @@ document.getElementById('btn-start').onclick = startTask;
 document.getElementById('btn-finish').onclick = finishTask;
 document.getElementById('btn-restart').onclick = restart;
 
+// ============ URL Payload Intake ============
+function parsePayloadFromUrl() {
+  try {
+    // Check both query string and hash
+    const urlParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
+    
+    const payloadStr = urlParams.get('payload') || hashParams.get('payload');
+    if (!payloadStr) return null;
+    
+    const payload = JSON.parse(decodeURIComponent(payloadStr));
+    
+    // Validate payload structure
+    if (!payload.tasks || !Array.isArray(payload.tasks) || payload.tasks.length === 0) {
+      console.warn('Invalid payload: missing or empty tasks array');
+      return null;
+    }
+    
+    // Cap at first 8 tasks
+    const tasks = payload.tasks.slice(0, 8).filter(t => typeof t === 'string' && t.trim());
+    
+    if (tasks.length === 0) {
+      console.warn('Invalid payload: no valid task strings');
+      return null;
+    }
+    
+    return { tasks };
+  } catch (e) {
+    console.warn('Failed to parse payload from URL:', e);
+    return null;
+  }
+}
+
+function startWithPayload(tasks) {
+  // Set up state with payload tasks
+  state.selected = [...tasks];
+  state.todayList = tasks.map(name => ({
+    name,
+    startedAt: null,
+    finishedAt: null,
+    elapsedSec: 0
+  }));
+  state.currentIndex = 0;
+  state.log = [];
+  
+  // Strip payload from URL so refresh doesn't re-import
+  const cleanUrl = window.location.pathname;
+  history.replaceState({}, document.title, cleanUrl);
+  
+  // Go directly to running state
+  showScreen('running');
+  renderRunning();
+}
+
 // ============ 起動 ============
 loadState();
-renderPlanning();
-showScreen('planning');
+
+// Check for payload and start directly if valid
+const payload = parsePayloadFromUrl();
+if (payload) {
+  startWithPayload(payload.tasks);
+} else {
+  renderPlanning();
+  showScreen('planning');
+}
 </script>
 </body>
 </html>
